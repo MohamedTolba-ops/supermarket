@@ -1,0 +1,25 @@
+{
+  "name": "supermarketdatabase",
+  "version": "1.0.0",
+  "description": "Simple supermarket inventory web app with Express and SQLite",
+  "main": "server.js",
+  "scripts": {
+    "init-db": "node init-db.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "express",
+    "sqlite",
+    "sql",
+    "supermarket"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  }
+}

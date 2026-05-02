@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supermarket Inventory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <h1>FreshMart Console</h1>
+    </div>
+    <nav class="tabs" aria-label="Main navigation">
+      <button id="tab-dashboard" class="tab" type="button" data-view="dashboard">Dashboard</button>
+      <button id="tab-products" class="tab" type="button" data-view="products">Products</button>
+      <button id="tab-orders" class="tab" type="button" data-view="orders">Orders</button>
+      <button id="tab-suppliers" class="tab" type="button" data-view="suppliers">Suppliers</button>
+      <button id="tab-employees" class="tab" type="button" data-view="employees">Employees</button>
+      <button id="tab-customers" class="tab" type="button" data-view="customers">Customers</button>
+    </nav>
+    <div class="userbox">
+      <button id="open-cart-btn" class="ghost cart-toggle" type="button" hidden>
+        Cart
+        <span id="cart-count" class="cart-count">0</span>
+      </button>
+      <button id="theme-toggle-btn" class="ghost theme-toggle" type="button" aria-label="Toggle theme">
+        <span id="theme-toggle-glyph" class="theme-toggle-glyph" aria-hidden="true">🌙</span>
+      </button>
+      <span id="auth-status">Not logged in</span>
+      <span id="role-badge" class="role-badge hidden" hidden>Consumer</span>
+      <button id="logout-btn" class="ghost" type="button" hidden>Logout</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="auth-view" class="view active">
+      <article class="auth-card">
+        <div id="login-panel" class="auth-panel">
+          <h2>Login</h2>
+          <form id="login-form" class="form-grid">
+            <label for="login-username">Username</label>
+            <input id="login-username" name="username" type="text" required />
+
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" required />
+
+            <button type="submit">Login</button>
+          </form>
+          <button id="show-signup-btn" class="auth-toggle-btn" type="button">Don&#39;t have an account? Create one</button>
+        </div>
+
+        <div id="signup-panel" class="auth-panel hidden">
+          <h2>Create Account</h2>
+          <form id="signup-form" class="form-grid">
+            <label for="signup-username">Username</label>
+            <input id="signup-username" name="username" type="text" minlength="3" required />
+
+            <label for="signup-password">Password</label>
+            <input id="signup-password" name="password" type="password" minlength="6" required />
+
+            <button type="submit">Sign Up</button>
+          </form>
+          <button id="show-login-btn" class="auth-toggle-btn" type="button">Already have an account? Log in</button>
+        </div>
+      </article>
+      <p id="auth-message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section id="app-shell" class="view">
+      <section id="dashboard-view" class="app-view">
+        <div class="dashboard-grid">
+          <article class="widget panel">
+            <h3>Total Products</h3>
+            <p id="total-products" class="widget-value">0</p>
+          </article>
+          <article class="widget panel">
+            <h3>Total Products In Stock</h3>
+            <p id="total-stock" class="widget-value">0</p>
+          </article>
+          <article class="widget panel">
+            <h3>Total Registered Customers</h3>
+            <p id="total-customers" class="widget-value">0</p>
+          </article>
+          <article class="widget panel">
+            <h3>Total Employees</h3>
+            <p id="total-employees" class="widget-value">0</p>
+          </article>
+        </div>
+        <p id="dashboard-message" class="message" aria-live="polite"></p>
+      </section>
+
+      <section id="products-view" class="app-view">
+        <div class="inventory-layout">
+          <article id="product-form-panel" class="panel">
+            <h2>Add New Product</h2>
+            <form id="product-form" class="form-grid">
+              <label for="name">Product Name</label>
+              <input id="name" name="name" type="text" placeholder="e.g. Bananas" required />
+
+              <label for="price">Price ($)</label>
+              <input id="price" name="price" type="number" min="0" step="0.01" placeholder="0.00" required />
+
+              <label for="stock_quantity">Stock Quantity</label>
+              <input id="stock_quantity" name="stock_quantity" type="number" min="0" step="1" placeholder="0" required />
+
+              <label for="supplier_name">Supplier Name</label>
+              <input id="supplier_name" name="supplier_name" type="text" placeholder="Type supplier name" required />
+
+              <button type="submit">Add Product</button>
+            </form>
+            <p id="form-message" class="message" aria-live="polite"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Products</h2>
+              <button id="refresh-products-btn" type="button" class="ghost">Refresh</button>
+            </div>
+            <div id="product-list" class="product-grid"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="orders-view" class="app-view">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Order History</h2>
+            <button id="refresh-orders-btn" type="button" class="ghost">Refresh</button>
+          </div>
+          <div id="orders-list" class="orders-list"></div>
+          <p id="orders-message" class="message" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="suppliers-view" class="app-view">
+        <div class="entity-layout">
+          <article class="panel">
+            <h2>Add Supplier</h2>
+            <form id="supplier-form" class="form-grid">
+              <label for="supplier-name">Name</label>
+              <input id="supplier-name" name="name" type="text" required />
+
+              <label for="supplier-contact">Contact Info</label>
+              <input id="supplier-contact" name="contact_info" type="text" required />
+
+              <button type="submit">Add Supplier</button>
+            </form>
+            <p id="suppliers-message" class="message" aria-live="polite"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Suppliers</h2>
+              <button id="refresh-suppliers-btn" type="button" class="ghost">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="suppliers-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="employees-view" class="app-view">
+        <div class="entity-layout">
+          <article class="panel">
+            <h2>Add Employee</h2>
+            <form id="employee-form" class="form-grid">
+              <label for="employee-name">Name</label>
+              <input id="employee-name" name="name" type="text" required />
+
+              <label for="employee-role">Role</label>
+              <input id="employee-role" name="role" type="text" placeholder="Cashier, Manager..." required />
+
+              <label for="employee-user-id">Linked User ID (optional)</label>
+              <input id="employee-user-id" name="user_id" type="number" min="1" step="1" />
+
+              <button type="submit">Add Employee</button>
+            </form>
+            <p id="employees-message" class="message" aria-live="polite"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Employees</h2>
+              <button id="refresh-employees-btn" type="button" class="ghost">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>User ID</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employees-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="customers-view" class="app-view">
+        <div class="entity-layout">
+          <article class="panel">
+            <h2>Add Customer</h2>
+            <form id="customer-form" class="form-grid">
+              <label for="customer-name">Name</label>
+              <input id="customer-name" name="name" type="text" required />
+
+              <label for="customer-email">Email</label>
+              <input id="customer-email" name="email" type="email" required />
+
+              <button type="submit">Add Customer</button>
+            </form>
+            <p id="customers-message" class="message" aria-live="polite"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Customers</h2>
+              <button id="refresh-customers-btn" type="button" class="ghost">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section id="receipt-modal" class="modal hidden" hidden aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal="true"></div>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>Receipt Preview</h2>
+          <button id="close-receipt-btn" type="button" class="ghost">Close</button>
+        </div>
+        <div id="receipt-content" class="receipt"></div>
+        <div class="modal-actions">
+          <button id="print-receipt-btn" type="button">Print Receipt</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="payment-modal" class="modal hidden" hidden aria-hidden="true">
+      <div class="modal-backdrop" data-close-payment="true"></div>
+      <div class="modal-dialog payment-dialog">
+        <div class="modal-header">
+          <h2>Complete Payment</h2>
+          <button id="close-payment-btn" type="button" class="ghost">Close</button>
+        </div>
+
+        <div class="payment-methods" role="radiogroup" aria-label="Payment method">
+          <label class="payment-option" for="payment-method-cash">
+            <input id="payment-method-cash" name="payment_method" type="radio" value="cash" checked />
+            <span>Cash on delivery</span>
+          </label>
+          <label class="payment-option" for="payment-method-card">
+            <input id="payment-method-card" name="payment_method" type="radio" value="card" />
+            <span>Credit Card</span>
+          </label>
+        </div>
+
+        <div id="credit-card-form" class="payment-card-form hidden">
+          <label for="payment-card-number">Card Number</label>
+          <input id="payment-card-number" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" />
+
+          <div class="payment-card-row">
+            <div>
+              <label for="payment-card-expiry">MM/YY</label>
+              <input id="payment-card-expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" />
+            </div>
+            <div>
+              <label for="payment-card-cvc">CVC</label>
+              <input id="payment-card-cvc" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions payment-actions">
+          <button id="cancel-payment-btn" type="button" class="ghost">Cancel</button>
+          <button id="confirm-payment-btn" type="button">Confirm Payment</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="cart-modal" class="modal hidden" hidden aria-hidden="true">
+      <div class="modal-backdrop" data-close-cart="true"></div>
+      <aside class="cart-dialog">
+        <div class="modal-header">
+          <h2>Shopping Cart</h2>
+          <button id="close-cart-btn" type="button" class="ghost">Close</button>
+        </div>
+
+        <div id="cart-items" class="cart-items"></div>
+
+        <div class="cart-footer">
+          <p class="cart-total">Total: <span id="cart-total">$0.00</span></p>
+          <div class="cart-actions">
+            <button id="clear-cart-btn" type="button" class="ghost">Clear Cart</button>
+            <button id="checkout-cart-btn" type="button">Checkout</button>
+          </div>
+          <p id="cart-message" class="message" aria-live="polite"></p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
